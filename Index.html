@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>PT Asuransi Jiwa</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* RESET & BASE */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+body { background:#eef2f7; color:#333; -webkit-tap-highlight-color: transparent; }
+
+/* HEADER RESMI */
+.header {
+    background: linear-gradient(135deg, #0a2a66, #14449e);
+    color: #fff;
+    padding: 24px 20px;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 4px 15px rgba(10, 42, 102, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.header::after {
+    content: ''; position: absolute; top: -50%; right: -20%;
+    width: 150px; height: 150px; background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+}
+.header h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; letter-spacing: 0.5px; }
+.header p { font-size: 13px; opacity: 0.85; font-weight: 300; }
+
+/* PAGE TRANSITION */
+.page {
+    position: fixed; width: 100%; height: 100%;
+    top: 0; left: 0; display: flex; flex-direction: column;
+    opacity: 0; visibility: hidden; transform: translateX(20px);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.page.active {
+    opacity: 1; visibility: visible; transform: translateX(0);
+}
+
+/* CONTENT */
+.content { flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 40px; }
+
+/* CARDS */
+.card {
+    background: #fff; border-radius: 16px; padding: 20px;
+    margin-bottom: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.02);
+}
+
+/* TYPOGRAPHY */
+.label { font-size: 11px; color: #7f8fa6; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+.value { font-size: 15px; font-weight: 600; color: #2f3640; margin-bottom: 12px; }
+.value:last-child { margin-bottom: 0; }
+p.disclaimer { font-size: 13px; color: #4b6584; line-height: 1.6; text-align: justify; margin-bottom: 15px; }
+
+/* CANVAS TTD */
+.canvas-container { position: relative; margin-bottom: 15px; }
+canvas {
+    width: 100%; height: 200px; background: #fafbfc;
+    border: 2px dashed #dcdde1; border-radius: 12px;
+    cursor: crosshair; touch-action: none;
+}
+.canvas-hint {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: #b2bec3; font-size: 13px; pointer-events: none; transition: 0.3s;
+}
+
+/* EXPLANATION BOX */
+.explanation-box {
+    background: #fff9e6;
+    border-radius: 15px;
+    padding: 18px;
+    margin-bottom: 20px; /* Jarak ke tombol bawah */
+    border-left: 5px solid #f1c40f;
+}
+.explanation-box h4 {
+    font-size: 13px; color: #856404; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+}
+.explanation-box p {
+    font-size: 11.5px; color: #6d5b24; line-height: 1.6; text-align: justify;
+}
+
+/* BUTTONS */
+.btn-group { display: flex; gap: 10px; margin-top: 5px; }
+.btn {
+    flex: 1; padding: 14px; border: none; border-radius: 12px;
+    font-weight: 600; font-size: 14px; cursor: pointer;
+    transition: all 0.2s; text-align: center;
+}
+.btn:active { transform: scale(0.97); }
+.primary { background: #0a2a66; color: #fff; box-shadow: 0 4px 12px rgba(10,42,102,0.3); }
+.success { background: #00b894; color: #fff; box-shadow: 0 4px 12px rgba(0,184,148,0.3); }
+.danger { background: #ffeaa7; color: #d63031; font-weight: 500; flex: 0.4; }
+
+/* COPY BADGE */
+.copy-badge {
+    display: inline-block; background: #eaf3ff; color: #0a2a66;
+    font-size: 10px; padding: 4px 10px; border-radius: 6px;
+    margin-top: 8px; cursor: pointer; font-weight: 700;
+}
+
+/* RECEIPT BOXES */
+.receipt-wrapper { background: #f8f9fa; border-radius: 12px; padding: 15px; margin-top: 10px; }
+.box { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 8px; border-bottom: 1px dashed #ddd; padding-bottom: 8px; }
+.box:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; font-size: 15px; font-weight: 700; color: #2d3436; margin-top: 10px; }
+
+/* INFO ALERT */
+.info { background: #eaf3ff; padding: 15px; border-left: 4px solid #0a2a66; border-radius: 10px; font-size: 13px; color: #0a2a66; line-height: 1.5; font-weight: 500; margin-bottom: 16px; }
+
+/* MODAL & OVERLAY */
+.overlay {
+    position: fixed; width: 100%; height: 100%; top: 0; left: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
+    opacity: 0; visibility: hidden; transition: 0.3s; z-index: 100;
+}
+.overlay.active { opacity: 1; visibility: visible; }
+
+.modal {
+    position: fixed; bottom: -100%; left: 0; width: 100%;
+    background: #fff; border-radius: 24px 24px 0 0;
+    display: flex; flex-direction: column; transition: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 101; max-height: 85vh;
+}
+.modal.active { bottom: 0; }
+.modal-header { padding: 20px; text-align: center; border-bottom: 1px solid #f1f2f6; position: relative; }
+.modal-header h3 { font-size: 16px; color: #2d3436; }
+.close-btn { position: absolute; right: 20px; top: 20px; font-size: 20px; color: #999; cursor: pointer; line-height: 1; }
+.modal-body { padding: 20px; overflow-y: auto; text-align: center; }
+.modal-footer { padding: 20px; background: #fff; border-top: 1px solid #f1f2f6; border-radius: 0 0 24px 24px; }
+
+/* PREVIEW & LOADER */
+.preview { width: 100%; max-height: 250px; object-fit: contain; border-radius: 12px; margin-top: 15px; display: none; }
+.loader-wrapper {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.95); z-index: 999;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    opacity: 0; visibility: hidden; transition: 0.3s;
+}
+.loader-wrapper.active { opacity: 1; visibility: visible; }
+.spinner { width: 50px; height: 50px; border: 4px solid #eef2f7; border-top: 4px solid #0a2a66; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.loader-text { margin-top: 15px; font-size: 14px; font-weight: 600; color: #0a2a66; }
+
+</style>
+</head>
+<body>
+
+<div class="loader-wrapper" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text">Memproses Dokumen Legal...</div>
+</div>
+
+<div class="page active" id="p1">
+    <div class="header">
+        <h1>PT Asuransi Jiwa Digital</h1>
+        <p>Dokumen Persetujuan e-Polis Resmi</p>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <div class="label">Nama Tertanggung</div>
+            <div class="value" id="nama"></div>
+            <div class="label">Nomor Polis Elektronik</div>
+            <div class="value" style="font-family: monospace; font-size: 16px;
+            color: #0a2a66;">AJD-2026-002547</div>
+            <div class="label">Tanggal Pengesahan</div>
+            <div class="value" id="tgl"></div>
+        </div>
+
+        <div class="card">
+            <p class="disclaimer">
+                Dengan ini saya menyatakan dalam keadaan sadar telah membaca, memahami, dan menyetujui seluruh syarat dan ketentuan polis asuransi jiwa yang berlaku secara hukum.
+            </p>
+            <div class="canvas-container">
+                <div class="canvas-hint" id="canvasHint">Tanda Tangan Di Sini</div>
+                <canvas id="ttd"></canvas>
+            </div>
+            <div class="btn-group">
+                <button class="btn danger" onclick="clearTTD()">Ulangi</button>
+                <button class="btn primary" onclick="processNextPage()">Sahkan & Lanjut</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page" id="p2">
+    <div class="header">
+        <h1>Pembayaran e-Polis</h1>
+        <p>Selesaikan pembayaran untuk aktivasi</p>
+    </div>
+
+    <div class="content">
+        <div class="card info">
+            Biaya tanda tangan digital dikenakan untuk proses autentikasi identitas, enkripsi dokumen, serta pencatatan legal elektronik agar dokumen memiliki kekuatan hukum mutlak.
+        </div>
+
+        <div class="card">
+            <div class="label">Rincian Tagihan</div>
+            <div class="receipt-wrapper">
+                <div class="box"><span>Administrasi</span> <span>Rp Gratis</span></div>
+                <div class="box"><span>e-Meterai & TTD</span> <span>Rp 65.000</span></div>
+                <div class="box"><span>Premi Asuransi</span> <span>Rp 600.000</span></div>
+                <div class="box"><span>Total Pembayaran</span> <span>Rp 665.000</span></div>
+            </div>
+        </div>
+
+        <div class="card" style="text-align: center;">
+            <div class="label">Transfer ke Rekening Resmi:</div>
+            <div style="font-size: 22px; font-weight: 700; color: #0a2a66;
+            margin-top: 10px; letter-spacing: 1px;" id="norek">10095349938</div>
+            <div class="copy-badge" onclick="copyNorek()">SALIN NOMOR</div>
+            <div style="font-size: 14px; font-weight: 500; margin-top:
+            10px;">a.n M Egar (BANK JASA JAKARTA)</div>
+        </div>
+
+        <div class="explanation-box">
+            <h4>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                Informasi Biaya Tanda Tangan
+            </h4>
+            <p>
+                Biaya tanda tangan digital mencakup proses verifikasi identitas
+                (e-KYC) secara real-time, penerbitan sertifikat elektronik oleh
+                otoritas resmi, serta enkripsi keamanan tingkat tinggi. Hal ini
+                memastikan dokumen polis Anda sah secara hukum (Legalitas UU
+                ITE) dan terlindungi dari manipulasi data. Sebagai bentuk
+                komitmen kami, biaya tersebut akan dikembalikan sepenuhnya ke
+                saldo/rekening Anda segera setelah polis diterbitkan secara sah.
+            </p>
+        </div>
+    
+        <button class="btn success" style="width: 100%;" onclick="openModal()">Konfirmasi Pembayaran</button>
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeModal()"></div>
+
+<div class="modal" id="modal">
+    <div class="modal-header">
+        <h3>Upload Bukti Transfer</h3>
+        <div class="close-btn" onclick="closeModal()">&times;</div>
+    </div>
+    <div class="modal-body">
+        <div class="upload-area" style="border: 2px dashed #0a2a66; border-radius: 12px; padding: 30px 20px; background: #f5f8ff; color: #0a2a66; position: relative;">
+            <span id="uploadText">Ketuk untuk pilih foto dari galeri</span>
+            <input type="file" accept="image/*" onchange="loadImg(event)" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0;">
+        </div>
+        <img id="imgPrev" class="preview">
+    </div>
+    <div class="modal-footer">
+        <button class="btn primary" style="width: 100%;" onclick="sendWA()" id="btnKirim" disabled>Kirim ke WhatsApp</button>
+    </div>
+</div>
+
+<script>
+// DATA
+const namaNasabah = "WAWAH OKTAVIA WULANDARI";
+document.getElementById("nama").innerText = namaNasabah;
+const today = new Date().toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' });
+document.getElementById("tgl").innerText = today;
+
+// CANVAS
+const canvas = document.getElementById("ttd");
+const ctx = canvas.getContext("2d");
+const hint = document.getElementById("canvasHint");
+let isDrawing = false, hasSigned = false;
+
+function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = 200;
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#0a2a66";
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
+canvas.addEventListener("mousedown", (e) => { isDrawing = true; hasSigned = true; hint.style.display = 'none'; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener("mousemove", (e) => { if(!isDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+canvas.addEventListener("mouseup", () => isDrawing = false);
+canvas.addEventListener("touchstart", (e) => { isDrawing = true; hasSigned = true; hint.style.display = 'none'; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); e.preventDefault(); }, {passive: false});
+canvas.addEventListener("touchmove", (e) => { if(!isDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }, {passive: false});
+canvas.addEventListener("touchend", () => isDrawing = false);
+
+function clearTTD() { ctx.clearRect(0, 0, canvas.width, canvas.height); hasSigned = false; hint.style.display = 'block'; }
+
+// NAVIGATION
+function processNextPage() {
+    if(!hasSigned) { alert("Silakan tanda tangan terlebih dahulu."); return; }
+    document.getElementById("loader").classList.add("active");
+    setTimeout(() => {
+        document.getElementById("loader").classList.remove("active");
+        document.getElementById("p1").classList.remove("active");
+        document.getElementById("p2").classList.add("active");
+        window.scrollTo(0,0);
+        resizeCanvas(); // Refresh canvas size
+    }, 1500);
+}
+
+// UTILS
+function copyNorek() {
+    const norek = "901153430120";
+    navigator.clipboard.writeText(norek).then(() => alert("Nomor rekening SeaBank berhasil disalin!"));
+}
+
+function openModal() { document.getElementById('modal').classList.add('active'); document.getElementById('overlay').classList.add('active'); }
+function closeModal() { document.getElementById('modal').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); }
+
+function loadImg(e) {
+    const file = e.target.files[0];
+    if(file) {
+        const reader = new FileReader();
+        reader.onload = function(x) {
+            document.getElementById("imgPrev").src = x.target.result;
+            document.getElementById("imgPrev").style.display = "block";
+            document.getElementById("uploadText").innerText = "Foto terpilih";
+            document.getElementById("btnKirim").disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function sendWA() {
+    const text = encodeURIComponent(`Halo Admin PT Asuransi Jiwa Digital,\n\nSaya ingin konfirmasi pembayaran e-Polis.\nNama: ${namaNasabah}\nTotal: Rp 550.000\n\nSaya akan mengirimkan bukti transfernya.`);
+    window.open(`https://wa.me/6285825187279?text=${text}`, "_blank");
+}
+</script>
+</body>
+</html>
